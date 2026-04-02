@@ -1,0 +1,47 @@
+<div class="container my-4 p-4 border rounded bg-light">
+  <!-- Upload from file -->
+  <h3 class="mb-3">Upload Image</h3>
+  <input type="file" class="form-control mb-3" (change)="onFileSelected($event)" />
+
+  <!-- Submit image URL -->
+  <h3 class="mb-3">Image URL</h3>
+  <input
+    type="text"
+    class="form-control mb-2"
+    [(ngModel)]="imageUrl"
+    placeholder="Enter image link"
+  />
+  <button class="btn btn-primary mb-3" (click)="analyzeUrl()">Analyze URL</button>
+
+  <!-- Display the image -->
+  <div *ngIf="previewSrc()" class="mb-3">
+    <h3 class="mb-2">Preview</h3>
+    <img
+      [src]="previewSrc()"
+      alt="Selected image"
+      class="img-fluid border rounded"
+      style="max-width: 400px"
+    />
+  </div>
+
+  <!-- Results -->
+  <h3 class="mb-3">Result</h3>
+  @if (!loading() && result()) {
+    <p><strong>Language:</strong> {{ result().language }}</p>
+    <p><strong>Orientation:</strong> {{ result().orientation }}</p>
+
+    @for (region of result().regions; track region) {
+      <div class="mb-3">
+        @for (line of region.lines; track line) {
+          <div class="mb-2">
+            @for (word of line.words; track word) {
+              <span class="me-2">{{ word.text }}</span>
+            }
+          </div>
+        }
+      </div>
+    }
+  } @else if (loading()) {
+    <div class="spinner">Analyzing image...</div>
+  }
+</div>
