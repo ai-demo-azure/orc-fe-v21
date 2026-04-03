@@ -9,17 +9,14 @@ import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { provideToastr } from 'ngx-toastr';
+import { environment } from '../environments/environment';
 
-export const API_BASE_URL = '';
-declare const NG_API_URL: string;
-declare const NG_PRODUCTION: boolean;
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(),
-    { provide: 'API_BASE_URL', useValue: NG_API_URL },
-    { provide: 'IS_PROD', useValue: NG_PRODUCTION },
+    { provide: 'API_BASE_URL', useValue: environment.apiUrl },
 
     importProvidersFrom(FormsModule),
     provideToastr(),
