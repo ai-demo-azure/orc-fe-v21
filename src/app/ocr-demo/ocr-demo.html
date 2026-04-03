@@ -4,14 +4,19 @@
   <input type="file" class="form-control mb-3" (change)="onFileSelected($event)" />
 
   <!-- Submit image URL -->
-  <h3 class="mb-3">Image URL</h3>
+  <h3 class="mb-3">Image Link</h3>
   <input
     type="text"
     class="form-control mb-2"
     [(ngModel)]="imageUrl"
+    (ngModelChange)="validateImage()"
     placeholder="Enter image link"
   />
-  <button class="btn btn-primary mb-3" (click)="analyzeUrl()">Analyze URL</button>
+  @if (imageValidate()) {
+    <button class="btn btn-primary mb-3" (click)="analyzeUrl()">Click ME!!</button>
+  } @else {
+    <button class="btn btn-primary mb-3" disabled="true">don't touch me</button>
+  }
 
   <!-- Display the image -->
   <div *ngIf="previewSrc()" class="mb-3">

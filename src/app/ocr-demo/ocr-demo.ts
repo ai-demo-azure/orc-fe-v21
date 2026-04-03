@@ -1,9 +1,10 @@
-import { Component, HostListener, NgZone, signal } from '@angular/core';
+import { Component, HostListener, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Ocr } from '../services/ocr';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { finalize, tap } from 'rxjs';
+import { finalize } from 'rxjs';
+import { ImageUtils } from '../shared/utils/image-utils';
 
 @Component({
   selector: 'app-ocr-demo',
@@ -16,13 +17,31 @@ export class OcrDemoComponent {
   loading = signal<boolean>(false);
   imageUrl = signal<string>('http://metalbyexample.com/wp-content/uploads/figure-65.png');
   previewSrc = signal<string | null>(this.imageUrl());
+  imageValidate = signal<boolean>(true);
 
   constructor(
     private ocrService: Ocr,
     private toastr: ToastrService,
   ) {}
 
-  analyzeUrl() {
+  async validateImage() {
+    this.imageValidate.set(await ImageUtils.checkImageUrl(this.imageUrl()));
+  }
+
+  async analyzeUrl() {
+    const valid = await ImageUtils.checkImageUrl(this.imageUrl());
+    if (!valid) {
+      this.toastr.error('Invalid image Link');
+      this.imageValidate.set(false);
+      return;
+    }
+
+    if (ImageUtils.isDataUri(this.imageUrl())) {
+      const file = ImageUtils.dataUriToFile(this.imageUrl(), 'pasted.png');
+      this.analyzeUpload(file);
+      return;
+    }
+
     this.previewSrc.set(this.imageUrl());
     this.loading.set(true);
     this.ocrService
@@ -32,7 +51,10 @@ export class OcrDemoComponent {
       )
       .subscribe({
         next: (res) => this.result.set(res),
-        error: (err) => this.toastr.error(err),
+        error: (err) => {
+          this.toastr.error(err.message);
+          console.log(err);
+        },
       });
   }
 
@@ -46,6 +68,7 @@ export class OcrDemoComponent {
       this.processFile(file);
     }
   }
+
   @HostListener('document:paste', ['$event'])
   onPaste(event: ClipboardEvent) {
     const items = event.clipboardData?.items;
@@ -63,7 +86,7 @@ export class OcrDemoComponent {
 
   private processFile(file: File) {
     this.previewSrc.set(URL.createObjectURL(file));
-    this.imageUrl.set(''); // clear URL when using pasted/uploaded image
+    // this.imageUrl.set(''); // clear URL when using pasted/uploaded image
     const reader = new FileReader();
     reader.onload = () => {
       const base64 = (reader.result as string).split(',')[1]; // strip "data:image/png;base64,"
