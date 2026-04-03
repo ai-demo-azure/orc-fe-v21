@@ -29,8 +29,7 @@
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.css"
             ],
-            "outputPath": "dist/orc-fe-v21",
-			"browser": ""
+            "outputPath": "dist/orc-fe-v21"
           },
           "configurations": {
             "production": {
